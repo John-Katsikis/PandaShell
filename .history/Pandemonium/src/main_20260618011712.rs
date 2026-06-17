@@ -84,113 +84,25 @@ fn main(){
                 "logo" => print_logo(),
 
                 "info" => {
-                    use std::process::Command;
+                    println!("--- Pandemonium System Information ---");
 
-                    println!();
-                    println!("====================================");
-                    println!("      PANDEMONIUM SYSTEM INFO");
-                    println!("====================================");
+                    println!("OS: {}", std::env::consts::OS);
+                    println!("Architecture: {}", std::env::consts::ARCH);
 
-                    // User
                     println!(
                         "User: {}",
                         std::env::var("USER")
                             .unwrap_or("Unknown".to_string())
                     );
 
-                    // Home directory
-                    println!(
-                        "Home: {}",
-                        std::env::var("HOME")
-                            .unwrap_or("Unknown".to_string())
-                    );
-
-                    // Current directory
                     println!(
                         "Directory: {}",
                         std::env::current_dir()
                             .unwrap()
                             .display()
                     );
+                }
 
-                    // Hostname
-                    let hostname = Command::new("hostname")
-                        .output()
-                        .unwrap();
-
-                    println!(
-                        "Host: {}",
-                        String::from_utf8_lossy(&hostname.stdout).trim()
-                    );
-
-                    // OS
-                    println!("OS: {}", std::env::consts::OS);
-
-                    // Architecture
-                    println!("Architecture: {}", std::env::consts::ARCH);
-
-                    // Kernel
-                    let kernel = Command::new("uname")
-                        .arg("-r")
-                        .output()
-                        .unwrap();
-
-                    println!(
-                        "Kernel: {}",
-                        String::from_utf8_lossy(&kernel.stdout).trim()
-                    );
-
-                    // CPU Name
-                    let cpu = Command::new("sysctl")
-                        .args(["-n", "machdep.cpu.brand_string"])
-                        .output();
-
-                    match cpu {
-                        Ok(output) => println!(
-                            "CPU: {}",
-                            String::from_utf8_lossy(&output.stdout).trim()
-                        ),
-                        Err(_) => println!("CPU: Apple Silicon"),
-                    }
-
-                    // Core Count
-                    println!(
-                        "CPU Cores: {}",
-                        std::thread::available_parallelism()
-                            .unwrap()
-                            .get()
-                    );
-
-                    // RAM
-                    let ram = Command::new("sysctl")
-                        .args(["-n", "hw.memsize"])
-                        .output()
-                        .unwrap();
-
-                    let ram_bytes: u64 = String::from_utf8_lossy(&ram.stdout)
-                        .trim()
-                        .parse()
-                        .unwrap_or(0);
-
-                    let ram_gb = ram_bytes / 1024 / 1024 / 1024;
-
-                    println!("RAM: {} GB", ram_gb);
-
-                    // Uptime
-                    let uptime = Command::new("uptime")
-                        .output()
-                        .unwrap();
-
-                    println!(
-                        "Uptime: {}",
-                        String::from_utf8_lossy(&uptime.stdout).trim()
-                    );
-
-                    println!("Shell: Pandemonium v0.1");
-                    println!("Welcome to the Abyss.");
-                    println!("====================================");
-                    println!();
-                },
                 "exit" | "quit" | "q" => return,
                 command => {
                     let stdin = previous_command
