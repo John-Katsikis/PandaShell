@@ -1,5 +1,5 @@
 use std::env;
-use std::io::{stdin, stdout, Write};
+use std::io::{stdout, Write};
 use std::path::Path;
 use std::process::{Child, Command, Stdio};
 
@@ -20,7 +20,7 @@ fn main() -> std::io::Result<()> {
 
     loop {
         print!(
-            "\r\x1b[2K\x1b[38;5;82m[PANDA] > \x1b[0m{}",
+            "\r\x1b[2K\x1b[38;5;82m[PANDEMONIUM] > \x1b[0m{}",
             buffer
         );
         stdout().flush().unwrap();
@@ -79,30 +79,6 @@ fn main() -> std::io::Result<()> {
                                 "weather" => commands::weather::run(&input),
                                 "help" => commands::help::run(),
 
-                                "forcequit" => {
-                                    if let Some(app) = args.peekable().peek() {
-                                        if cfg!(target_os = "macos") {
-                                            // macOS: killall -9 "AppName"
-                                            let _ = Command::new("killall")
-                                                .arg("-9")
-                                                .arg(app)
-                                                .status();
-                                        } else if cfg!(target_os = "linux") {
-                                            // Linux: pkill -9 appname
-                                            let _ = Command::new("pkill")
-                                                .arg("-9")
-                                                .arg(app)
-                                                .status();
-                                        } else {
-                                            eprintln!("forcequit is not supported on this OS");
-                                        }
-                                    } else {
-                                        eprintln!("Usage: forcequit <AppName>");
-                                    }
-
-                                    previous_command = None;
-                                }
-
                                 "exit" | "quit" | "q" => {
                                     return Ok(());
                                 }
@@ -157,24 +133,19 @@ fn main() -> std::io::Result<()> {
                         print!("Select number: ");
                         stdout().flush().unwrap();
 
-                        disable_raw_mode()?;
-
-                        let mut selection = String::new();
-                        std::io::stdin().read_line(&mut selection)?;
-
-                        enable_raw_mode()?;
-
-                        if let Ok(idx) = selection.trim().parse::<usize>() {
-                            if let Some(cmd) = history.get(idx) {
-                                buffer = cmd.clone();
-                            } else {
-                                print!("\r\nNo history item at index {}\r\n", idx);
+                        if let Event::Key(num_key) = event::read()? {
+                            if let KeyCode::Char(digit) = num_key.code {
+                                if let Some(idx) = digit.to_digit(10) {
+                                    if let Some(cmd) = history.get(idx as usize) {
+                                        buffer = cmd.clone();
+                                    }
+                                }
                             }
-                        } else {
-                            print!("\r\nInvalid selection\r\n");
                         }
-                    }
 
+                        print!("\r\n");
+                    }
+                    
                     KeyCode::Esc => {
                         disable_raw_mode()?;
                         return Ok(());

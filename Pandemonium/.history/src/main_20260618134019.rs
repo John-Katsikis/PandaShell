@@ -1,74 +1,67 @@
 use std::env;
-use std::io::{stdin, stdout, Write};
+use std::io::{stdout, Write};
 use std::path::Path;
 use std::process::{Child, Command, Stdio};
 
 use crossterm::{
     event::{self, Event, KeyCode},
-    terminal::{disable_raw_mode, enable_raw_mode},
+    terminal::{enable_raw_mode, disable_raw_mode},
 };
 
 mod commands;
 
-fn main() -> std::io::Result<()> {
+fn main() -> crossterm::Result<()> {
+
     commands::logo::run();
 
-    enable_raw_mode()?;
+    enable_raw_mode()?; // <-- RAW MODE ENABLED
 
     let mut history: Vec<String> = Vec::new();
     let mut buffer = String::new();
 
     loop {
-        print!(
-            "\r\x1b[2K\x1b[38;5;82m[PANDA] > \x1b[0m{}",
-            buffer
-        );
+        // draw prompt + current buffer
+        print!("\r\x1b[38;5;82m[PANDEMONIUM] > \x1b[0m{}", buffer);
         stdout().flush().unwrap();
 
+        // wait for keypress
         if event::poll(std::time::Duration::from_millis(200))? {
             if let Event::Key(key) = event::read()? {
                 match key.code {
+
+                    // typed character
                     KeyCode::Char(c) => {
                         buffer.push(c);
                     }
 
+                    // backspace
                     KeyCode::Backspace => {
                         buffer.pop();
                     }
 
+                    // ENTER → run your existing pipeline logic
                     KeyCode::Enter => {
-                        println!("\r");
-                        disable_raw_mode()?;
-
+                        println!();
                         let input = buffer.clone();
-
-                        if !input.trim().is_empty() {
-                            history.push(input.clone());
-                        }
-
+                        history.push(input.clone());
                         buffer.clear();
 
-                        let mut pipeline_commands = input.trim().split(" | ").peekable();
+                        // --- YOUR ORIGINAL EXECUTION LOGIC ---
+                        let mut commands = input.trim().split(" | ").peekable();
                         let mut previous_command = None;
 
-                        while let Some(command_text) = pipeline_commands.next() {
-                            let mut parts = command_text.trim().split_whitespace();
-
-                            let Some(command) = parts.next() else {
-                                continue;
-                            };
-
+                        while let Some(command) = commands.next() {
+                            let mut parts = command.trim().split_whitespace();
+                            let Some(command) = parts.next() else { continue };
                             let args = parts;
 
                             match command {
                                 "cd" => {
                                     let new_dir = args.peekable().peek().map_or("/", |x| *x);
                                     let root = Path::new(new_dir);
-
-                                    if let Err(e) = env::set_current_dir(root) {
+                                    if let Err(e) = env::set_current_dir(&root) {
                                         eprintln!("{}", e);
                                     }
-
                                     previous_command = None;
                                 }
 
@@ -79,43 +72,18 @@ fn main() -> std::io::Result<()> {
                                 "weather" => commands::weather::run(&input),
                                 "help" => commands::help::run(),
 
-                                "forcequit" => {
-                                    if let Some(app) = args.peekable().peek() {
-                                        if cfg!(target_os = "macos") {
-                                            // macOS: killall -9 "AppName"
-                                            let _ = Command::new("killall")
-                                                .arg("-9")
-                                                .arg(app)
-                                                .status();
-                                        } else if cfg!(target_os = "linux") {
-                                            // Linux: pkill -9 appname
-                                            let _ = Command::new("pkill")
-                                                .arg("-9")
-                                                .arg(app)
-                                                .status();
-                                        } else {
-                                            eprintln!("forcequit is not supported on this OS");
-                                        }
-                                    } else {
-                                        eprintln!("Usage: forcequit <AppName>");
-                                    }
-
-                                    previous_command = None;
-                                }
-
                                 "exit" | "quit" | "q" => {
+                                    disable_raw_mode()?;
                                     return Ok(());
                                 }
 
                                 command => {
-                                    let stdin = previous_command.map_or(
-                                        Stdio::inherit(),
-                                        |output: Child| {
+                                    let stdin = previous_command
+                                        .map_or(Stdio::inherit(), |output: Child| {
                                             Stdio::from(output.stdout.unwrap())
-                                        },
-                                    );
+                                        });
 
-                                    let stdout = if pipeline_commands.peek().is_some() {
+                                    let stdout = if commands.peek().is_some() {
                                         Stdio::piped()
                                     } else {
                                         Stdio::inherit()
@@ -143,38 +111,30 @@ fn main() -> std::io::Result<()> {
                                 eprintln!("wait failed: {}", e);
                             }
                         }
-
-                        enable_raw_mode()?;
+                        // --- END ORIGINAL LOGIC ---
                     }
 
+                    // TAB → show history and allow selection
                     KeyCode::Tab => {
-                        print!("\r\n--- History ---\r\n");
-
+                        println!("\n--- History ---");
                         for (i, cmd) in history.iter().enumerate() {
-                            print!("{}: {}\r\n", i, cmd);
+                            println!("{}: {}", i, cmd);
                         }
-
                         print!("Select number: ");
                         stdout().flush().unwrap();
 
-                        disable_raw_mode()?;
-
-                        let mut selection = String::new();
-                        std::io::stdin().read_line(&mut selection)?;
-
-                        enable_raw_mode()?;
-
-                        if let Ok(idx) = selection.trim().parse::<usize>() {
-                            if let Some(cmd) = history.get(idx) {
-                                buffer = cmd.clone();
-                            } else {
-                                print!("\r\nNo history item at index {}\r\n", idx);
+                        if let Event::Key(num_key) = event::read()? {
+                            if let KeyCode::Char(digit) = num_key.code {
+                                if let Some(idx) = digit.to_digit(10) {
+                                    if let Some(cmd) = history.get(idx as usize) {
+                                        buffer = cmd.clone();
+                                    }
+                                }
                             }
-                        } else {
-                            print!("\r\nInvalid selection\r\n");
                         }
                     }
 
+                    // ESC → exit shell
                     KeyCode::Esc => {
                         disable_raw_mode()?;
                         return Ok(());

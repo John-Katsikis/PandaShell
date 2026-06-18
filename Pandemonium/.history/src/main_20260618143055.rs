@@ -20,7 +20,7 @@ fn main() -> std::io::Result<()> {
 
     loop {
         print!(
-            "\r\x1b[2K\x1b[38;5;82m[PANDA] > \x1b[0m{}",
+            "\r\x1b[2K\x1b[38;5;82m[PANDEMONIUM] > \x1b[0m{}",
             buffer
         );
         stdout().flush().unwrap();
