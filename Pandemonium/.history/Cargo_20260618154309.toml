@@ -1,0 +1,8 @@
+[package]
+name = "Panda"
+version = "0.0.1"
+edition = "2024"
+
+[dependencies]
+rug = "1.26"
+crossterm = "0.27"

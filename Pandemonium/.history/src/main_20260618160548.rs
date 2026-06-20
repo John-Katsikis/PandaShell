@@ -77,11 +77,8 @@ fn main() -> std::io::Result<()> {
                                 "info" => commands::info::run(),
                                 "pi" => commands::pi::run(&input),
                                 "weather" => commands::weather::run(&input),
-                                "hash" => commands::hash::run(&input),
                                 "help" => commands::help::run(),
                                 
-                                "formula" => commands::formula::run(&input),
-
                                 "forcequit" => {
                                     commands::forcequit::run(&mut args.clone());
                                     previous_command = None;

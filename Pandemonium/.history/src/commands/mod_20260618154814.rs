@@ -5,5 +5,3 @@ pub mod pi;
 pub mod weather;
 pub mod help;
 pub mod forcequit;
-pub mod hash;
-pub mod formula;

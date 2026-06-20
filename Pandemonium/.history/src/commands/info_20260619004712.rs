@@ -11,7 +11,7 @@ pub fn run() {
 
     println!();
     println!("====================================");
-    println!("         PANDA SYSTEM INFO");
+    println!("          PANDA SYSTEM INFO");
     println!("====================================");
 
     println!("User: {}", username);

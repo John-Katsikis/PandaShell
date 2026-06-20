@@ -18,7 +18,10 @@ pub fn run(input: &str) {
     }
 
     match parse_expression(expr_str) {
-        Ok(expr) => println!("{}", eval(&expr)),
+        Ok(expr) => {
+            let result = eval(&expr);
+            println!("{}", result);
+        }
         Err(e) => println!("\x1b[91mError: {}\x1b[0m", e),
     }
 }
@@ -140,7 +143,7 @@ fn parse_primary(chars: &mut Peekable<Chars>) -> Result<Expr, String> {
             return parse_number(chars);
         }
 
-        // identifier (function or implicit call)
+        // function or implicit function call
         if c.is_ascii_alphabetic() {
             return parse_identifier(chars);
         }
@@ -167,7 +170,6 @@ fn parse_primary(chars: &mut Peekable<Chars>) -> Result<Expr, String> {
 fn parse_identifier(chars: &mut Peekable<Chars>) -> Result<Expr, String> {
     skip_spaces(chars);
 
-    // read identifier name
     let mut name = String::new();
     while let Some(&c) = chars.peek() {
         if c.is_ascii_alphabetic() {
@@ -234,6 +236,41 @@ fn parse_number(chars: &mut Peekable<Chars>) -> Result<Expr, String> {
         .map_err(|_| "Invalid number".into())
 }
 
+fn parse_function(chars: &mut Peekable<Chars>) -> Result<Expr, String> {
+    skip_spaces(chars);
+
+    let mut name = String::new();
+    while let Some(&c) = chars.peek() {
+        if c.is_ascii_alphabetic() {
+            name.push(c);
+            chars.next();
+        } else {
+            break;
+        }
+    }
+
+    skip_spaces(chars);
+
+    if chars.next() != Some('(') {
+        return Err("Expected '(' after function name".into());
+    }
+
+    skip_spaces(chars);
+
+    let arg = parse_expr(chars)?;
+
+    skip_spaces(chars);
+
+    if chars.next() != Some(')') {
+        return Err("Missing ')' after function argument".into());
+    }
+
+    Ok(Expr::Func {
+        name,
+        arg: Box::new(arg),
+    })
+}
+
 pub fn skip_spaces(chars: &mut Peekable<Chars>) {
     while let Some(&c) = chars.peek() {
         if c.is_whitespace() {
@@ -247,10 +284,6 @@ pub fn skip_spaces(chars: &mut Peekable<Chars>) {
 pub fn eval_with_x(expr: &Expr, x: f64) -> f64 {
     match expr {
         Expr::Number(n) => *n,
-
-        Expr::UnaryOp { op: '-', expr } => -eval_with_x(expr, x),
-        Expr::UnaryOp { op, .. } => panic!("Unsupported unary operator '{}'", op),
-
         Expr::BinaryOp { left, op, right } => {
             let l = eval_with_x(left, x);
             let r = eval_with_x(right, x);
@@ -263,11 +296,11 @@ pub fn eval_with_x(expr: &Expr, x: f64) -> f64 {
                 _ => panic!("Unknown operator"),
             }
         }
-
+        Expr::UnaryOp { op: '-', expr } => -eval_with_x(expr, x),
+        Expr::UnaryOp { op, .. } => panic!("Unsupported unary operator '{}'", op),
         Expr::Func { name, arg } => {
             let v = eval_with_x(arg, x);
             match name.as_str() {
-                "x" => x,
                 "sqrt" => v.sqrt(),
                 "sin" => v.sin(),
                 "cos" => v.cos(),

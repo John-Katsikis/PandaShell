@@ -133,7 +133,7 @@ fn fetch_current(entry: &GeoEntry) -> Option<WeatherResponseCurrent> {
 
 fn fetch_hourly(entry: &GeoEntry) -> Option<WeatherResponseHourly> {
     let url = format!(
-        "https://api.open-meteo.com/v1/forecast?latitude={}&longitude={}&hourly=time,temperature_2m,precipitation,weather_code&forecast_days=1",
+        "https://api.open-meteo.com/v1/forecast?latitude={}&longitude={}&hourly=temperature_2m,precipitation,weather_code&forecast_days=1&timezone=auto",
         entry.latitude, entry.longitude
     );
     let resp = blocking::get(&url).ok()?;
@@ -142,9 +142,11 @@ fn fetch_hourly(entry: &GeoEntry) -> Option<WeatherResponseHourly> {
 
 fn fetch_daily(entry: &GeoEntry, days: usize) -> Option<WeatherResponseDaily> {
     let url = format!(
-        "https://api.open-meteo.com/v1/forecast?latitude={}&longitude={}&daily=time,temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code&forecast_days={}",
+        "https://api.open-meteo.com/v1/forecast?latitude={}&longitude={}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code&forecast_days={}&timezone=auto",
         entry.latitude, entry.longitude, days
     );
+
+
     let resp = blocking::get(&url).ok()?;
     resp.json().ok()
 }
@@ -324,14 +326,7 @@ pub fn run(input: &str) {
         return;
     }
 
-    // FIX: join all tokens after "weather" until a flag to form the city name
-    let city = parts[1..]
-        .iter()
-        .take_while(|&&p| !p.starts_with("--"))
-        .cloned()
-        .collect::<Vec<&str>>()
-        .join(" ");
-
+    let city = parts[1];
     let mut flag: Option<&str> = None;
     let mut days: usize = 3;
 
@@ -355,7 +350,7 @@ pub fn run(input: &str) {
         i += 1;
     }
 
-    let Some(entry) = geocode_city(&city) else {
+    let Some(entry) = geocode_city(city) else {
         eprintln!("City not found");
         return;
     };

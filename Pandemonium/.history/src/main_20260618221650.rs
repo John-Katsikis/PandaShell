@@ -80,8 +80,6 @@ fn main() -> std::io::Result<()> {
                                 "hash" => commands::hash::run(&input),
                                 "help" => commands::help::run(),
                                 
-                                "formula" => commands::formula::run(&input),
-
                                 "forcequit" => {
                                     commands::forcequit::run(&mut args.clone());
                                     previous_command = None;

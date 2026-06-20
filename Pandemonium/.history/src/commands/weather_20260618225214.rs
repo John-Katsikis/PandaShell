@@ -324,14 +324,7 @@ pub fn run(input: &str) {
         return;
     }
 
-    // FIX: join all tokens after "weather" until a flag to form the city name
-    let city = parts[1..]
-        .iter()
-        .take_while(|&&p| !p.starts_with("--"))
-        .cloned()
-        .collect::<Vec<&str>>()
-        .join(" ");
-
+    let city = parts[1];
     let mut flag: Option<&str> = None;
     let mut days: usize = 3;
 
@@ -355,7 +348,7 @@ pub fn run(input: &str) {
         i += 1;
     }
 
-    let Some(entry) = geocode_city(&city) else {
+    let Some(entry) = geocode_city(city) else {
         eprintln!("City not found");
         return;
     };
@@ -397,7 +390,7 @@ pub fn run(input: &str) {
             }
         }
         Some(_) => {
-            eprintln!("Unknown flag. Usage: weather <city> [--hourly|--tomorrow|--days N|--alerts]");
-        }
+        eprintln!("Unknown flag. Usage: weather <city> [--hourly|--tomorrow|--days N|--alerts]");
+    }
     }
 }
