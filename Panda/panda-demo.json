@@ -1,0 +1,84 @@
+{
+  "app": {
+    "name": "Panda",
+    "version": "0.2.0",
+    "description": "A colorful Rust shell with practical utilities, math tools, and terminal art.",
+    "identity": {
+      "theme": "neon utility shell",
+      "prompt": "[PANDA] >",
+      "colors": ["green", "cyan", "magenta", "yellow", "blue"],
+      "mood": "sharp, playful, useful"
+    }
+  },
+  "features": {
+    "shell": {
+      "astParsing": true,
+      "pipes": true,
+      "quotedArguments": true,
+      "historyPicker": "TAB"
+    },
+    "commands": [
+      {
+        "name": "calc",
+        "category": "math",
+        "examples": ["calc 2sin(pi/2) + sqrt(9)", "calc log(2, 8)", "calc 5!"]
+      },
+      {
+        "name": "formula",
+        "category": "math-visual",
+        "examples": ["formula sin(x) 0 tau", "formula exp(-x^2) -3 3"]
+      },
+      {
+        "name": "weather",
+        "category": "network",
+        "examples": ["weather Athens", "weather \"New York\" --days 3"]
+      },
+      {
+        "name": "tree",
+        "category": "filesystem",
+        "examples": ["tree", "tree . --all"]
+      },
+      {
+        "name": "json",
+        "category": "utility",
+        "examples": ["json file panda-demo.json", "json pretty '{\"panda\":true}'"]
+      }
+    ]
+  },
+  "testCases": {
+    "strings": {
+      "plain": "hello panda",
+      "quoted": "She said, \"Panda is awake.\"",
+      "unicode": "π λ 你好 مرحبا",
+      "escapedPath": "C:\\Users\\Panda\\demo.json"
+    },
+    "numbers": {
+      "integer": 42,
+      "negative": -128,
+      "float": 3.1415926535,
+      "scientific": 6.022e23,
+      "tiny": 0.000001
+    },
+    "booleans": [true, false],
+    "emptyValues": {
+      "array": [],
+      "object": {},
+      "string": ""
+    },
+    "nullable": null
+  },
+  "nested": {
+    "level1": {
+      "level2": {
+        "level3": {
+          "message": "If this formats nicely, the json command is doing its job.",
+          "items": [
+            { "id": 1, "label": "parse" },
+            { "id": 2, "label": "validate" },
+            { "id": 3, "label": "pretty print" }
+          ]
+        }
+      }
+    }
+  }
+}
