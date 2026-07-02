@@ -1,7 +1,19 @@
 [package]
 name = "Panda"
-version = "0.2.0"
+version = "1.0.0"
 edition = "2024"
+
+[lib]
+name = "panda"
+path = "src/lib.rs"
+
+[[bin]]
+name = "Panda"
+path = "src/main.rs"
+
+[[bin]]
+name = "PandaGui"
+path = "src/bin/panda_gui.rs"
 
 [dependencies]
 rug = "1.26"
@@ -13,3 +25,6 @@ hex = "0.4.3"
 sha2 = "0.11.0"
 pcap = "1.3"
 qrcode = "0.14"
+eframe = "0.33"
+portable-pty = "0.9"
+vt100 = "0.16"

@@ -10,13 +10,14 @@ pub fn run() {
     print_header();
 
     section(
-        "Shell",
+        "Shell & Apps",
         GREEN,
         &[
             ("cd <dir>", "Change directory"),
             ("clear_history", "Clear the in-session command history"),
             ("app <name>", "Open a macOS app by name"),
             ("app --list [search]", "List or search installed macOS apps"),
+            ("forcequit <app>", "Force quit an app or process by name"),
             ("restart <app>", "Quit and reopen a macOS app"),
             ("logo", "Clear the screen and redraw the Panda banner"),
             ("exit | quit | q", "Leave Panda"),
@@ -34,11 +35,11 @@ pub fn run() {
         &[
             (
                 "calc <expr>",
-                "Evaluate numeric expressions with constants and functions",
+                "Evaluate math expressions with constants, functions, and variables",
             ),
             (
                 "formula <expr> <min> <max>",
-                "Plot y=f(x) as an ASCII graph",
+                "Plot y=f(x), including advanced bachelor-level functions",
             ),
             (
                 "pi <digits>",
@@ -49,6 +50,7 @@ pub fn run() {
                 "Print raw pi digits for copying or piping",
             ),
             ("qr [options] <text>", "Print a scannable terminal QR code"),
+            ("logo", "Show the bright Panda ASCII wordmark"),
             (
                 "spark [seed text]",
                 "Generate a deterministic colorful terminal sigil",
@@ -70,7 +72,8 @@ pub fn run() {
         &[
             ("hash <text>", "SHA-256 hash text"),
             ("hash --file <path>", "SHA-256 hash a file"),
-            ("json pretty <json>", "Validate and format JSON"),
+            ("json pretty <json>", "Validate and format JSON text"),
+            ("json file <path>", "Pretty-print and inspect a JSON file"),
             ("uuid [short] [count]", "Generate UUIDs or short IDs"),
             ("url encode|decode <text>", "Encode or decode URL text"),
             (
@@ -81,6 +84,7 @@ pub fn run() {
             ("doctor [mode]", "Diagnose disk, project, and tool health"),
             ("weather <city>", "Current weather from Open-Meteo"),
             ("weather <city> --hourly", "Hourly forecast"),
+            ("weather <city> --tomorrow", "Tomorrow forecast"),
             ("weather <city> --days N", "Multi-day forecast"),
             ("tree [path]", "Finder-like visible directory view"),
             (
@@ -100,12 +104,32 @@ pub fn run() {
             ("gitinfo", "Quick git repository dashboard"),
             ("serve [port]", "Serve the current directory over HTTP"),
             ("watch [options]", "Refresh a live system/project dashboard"),
+            ("watch --live", "Run a live dashboard in the GUI PTY"),
             ("timer <duration>", "Countdown timer or stopwatch"),
+            ("timer stopwatch", "Interactive stopwatch"),
             ("sniff --list", "List packet-capture interfaces"),
             ("sniff --interface IFACE --count N", "Capture IPv4 packets"),
             ("sniff --tcp --port 443", "Capture HTTPS-like TCP traffic"),
             ("sniff --icmp --count 5", "Capture ICMP packets"),
-            ("forcequit <app>", "Force quit an app/process by name"),
+        ],
+    );
+
+    section(
+        "GUI & PTY",
+        BLUE,
+        &[
+            ("PandaGui", "Open the graphical Panda terminal workspace"),
+            ("nano | vim | less | top", "Run in embedded PTY panes"),
+            ("python3 | node | ollama", "Interactive REPL/chat panes"),
+            (
+                "ollama run <model>",
+                "Full-width Ollama pane with Ask/Break controls",
+            ),
+            ("Click a live pane", "Focus keyboard input for that pane"),
+            (
+                "Bright badges",
+                "Live/done/focused hints use readable dark text",
+            ),
         ],
     );
 
@@ -117,7 +141,8 @@ fn print_header() {
     println!();
     println!("{GREEN}╭──────────────────── PANDA HELP ────────────────────╮{RESET}");
     println!(
-        "{GREEN}│{RESET} {MAGENTA}Panda command reference{RESET} {DIM}v0.2.0{RESET}                       {GREEN}│{RESET}"
+        "{GREEN}│{RESET} {MAGENTA}Panda command reference{RESET} {DIM}v{}{RESET}                       {GREEN}│{RESET}",
+        env!("CARGO_PKG_VERSION")
     );
     println!("{GREEN}╰─────────────────────────────────────────────────────╯{RESET}");
 }
@@ -149,12 +174,14 @@ fn examples() {
     println!("{DIM}  qr --compact \"https://example.com\"{RESET}");
     println!("{DIM}  spark hash Yianni{RESET}");
     println!("{DIM}  spark --compare @Cargo.toml @Cargo.lock{RESET}");
-    println!("{DIM}  json pretty '{{\"panda\":true}}'{RESET}");
+    println!("{DIM}  json file panda-demo.json{RESET}");
     println!("{DIM}  gitinfo{RESET}");
     println!("{DIM}  todo add \"polish Panda\"{RESET}");
     println!("{DIM}  tree{RESET}");
     println!("{DIM}  tree . --all{RESET}");
     println!("{DIM}  weather Athens --alerts{RESET}");
+    println!("{DIM}  serve 8080{RESET}");
+    println!("{DIM}  ollama run llama3.2{RESET}");
     println!("{DIM}  sniff --interface en0 --tcp --port 443 --count 20{RESET}");
 }
 
